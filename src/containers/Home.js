@@ -4,6 +4,7 @@ import PropTypes from 'prop-types';
 import Actions from 'actions';
 import _debounce from 'lodash/debounce';
 import _filter from 'lodash/filter';
+import _isEmpty from 'lodash/isEmpty';
 import {
   View,
   Text,
@@ -12,8 +13,11 @@ import {
   StatusBar,
   FlatList,
   RefreshControl,
+  ActivityIndicator,
+  TextInput,
+  Keyboard,
 } from 'react-native';
-import { Icon, Input } from 'native-base';
+import { Icon } from 'native-base';
 import * as Colors from 'themes/colors';
 import Loading from 'components/Loading';
 import FilmCard from './local_components/FilmCard';
@@ -24,28 +28,59 @@ class Home extends Component {
     super(props);
     this.state = {
       filmData: [],
+      isReload: false,
+      currentPage: 1,
+      searchText: 'Marvel',
     };
     this.onSearchTextChange = _debounce(this.onSearchTextChange, 400);
   }
 
   componentDidMount() {
     this.setState({ filmData: FilmData });
-    // this.props.fetchFilmList('Marvel', 'movie');
+    this.props.fetchFilmList('Marvel', 'movie', this.state.currentPage, false);
   }
 
   onSearchTextChange = (t: string) => {
-    const newFilmData = _filter(FilmData, item => (
-      item.Title.toLowerCase().includes(t)
-    ));
-    this.setState({ filmData: newFilmData });
-  }
-
-  onReload = () => {
-    console.log('reload');
+    if (t === '') {
+      this.setState({ searchText: 'Marvel' });
+      this.props.fetchFilmList('Marvel', 'movie', 1, true);
+    } else {
+      this.setState({ searchText: t });
+      this.props.fetchFilmList(t, 'movie', 1, true);
+    }
   }
 
   onCardClick = (item) => {
     this.props.navigation.navigate('Details', { filmData: item })
+  }
+
+  onFetchList = (reload) => {
+    const { fetching, firmList, totalResults, errors } = this.props;
+    const { searchText } = this.state;
+
+    if (fetching) return;
+
+    if (reload) {
+      this.setState({ isReload: true, currentPage: 1 });
+      if (searchText === '') {
+        this.props.fetchFilmList('Marvel', 'movie', 1, true);
+      } else {
+        this.props.fetchFilmList(searchText, 'movie', 1, true);
+      }
+      return;
+    }
+    this.setState({ isReload: false });
+    if (_isEmpty(errors)) {
+      if (firmList.length < totalResults) {
+        this.setState({ currentPage: this.state.currentPage + 1 });
+        if (searchText === '') {
+          this.props.fetchNextFilmList('Marvel', 'movie', this.state.currentPage + 1, false);
+      } else {
+          this.props.fetchNextFilmList(searchText, 'movie', this.state.currentPage + 1, false);
+        }
+      }
+    }
+    
   }
 
   renderListItem = (item, index) => {
@@ -54,11 +89,21 @@ class Home extends Component {
     );
   }
 
+  renderListFooter(fetching, reloading, currentPage) {
+    return (fetching && !reloading && currentPage !== 1) ? (
+      <View style={styles.loader}>
+        <ActivityIndicator size="small" color={Colors.primary} />
+      </View>
+    ) : null;
+  }
+
   render() {
+    const { fetching, firmList, totalResults } = this.props;
+
     return (
       <View style={styles.container}>
         <StatusBar barStyle="light-content"/>
-        {/* <Loading processing={true} cleanBackground /> */}
+        <Loading processing={!this.state.isReload && fetching} cleanBackground />
         <View style={styles.headerContainer}>
           <Text style={styles.titleText}>Film List</Text>
           <Icon
@@ -67,7 +112,7 @@ class Home extends Component {
             style={styles.icon}
           />
         </View>
-        <Input
+        <TextInput
           placeholder={'Search here...'}
           placeholderTextColor={Colors.white}
           autoCapitalize={'none'}
@@ -76,23 +121,22 @@ class Home extends Component {
         />
         <FlatList
           contentContainerStyle={{}}
+          onEndReached={() => this.onFetchList(false)}
           refreshControl={(
             <RefreshControl
               tintColor={Colors.secondary}
-              refreshing={false}
-              onRefresh={this.onReload}
+              refreshing={this.state.isReload && fetching}
+              onRefresh={() => this.onFetchList(true)}
             />
           )}
           numColumns={2}
-          data={this.state.filmData}
-          extraData={this.state.filmData}
+          data={firmList}
+          extraData={firmList}
+          onScrollBeginDrag={() => Keyboard.dismiss()}
           keyExtractor={item => item.imdbID.toString()}
           renderItem={({ item, index }) => this.renderListItem(item, index)}
+          ListFooterComponent={() => this.renderListFooter(fetching, this.state.isReload, this.state.currentPage)}
         />
-        {/* <Button
-          title="Go to Details"
-          onPress={() => navigation.navigate('Details')}
-        /> */}
       </View>
     );
   }
@@ -127,20 +171,37 @@ const styles = StyleSheet.create({
     borderBottomWidth: StyleSheet.hairlineWidth * 2,
     borderBottomColor: Colors.white,
   },
+  loader: {
+    flex: 1,
+    height: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 60,
+  },
 });
 
 Home.propTypes = {
   fetchFilmList: PropTypes.func.isRequired,
+  fetchNextFilmList: PropTypes.func.isRequired,
+  firmList: PropTypes.array.isRequired,
+  fetching: PropTypes.bool.isRequired,
+  totalResults: PropTypes.number.isRequired,
+  errors: PropTypes.array.isRequired,
 };
 
 Home.defaultProps = {
 };
 
 const mapStateToProps = store => ({
+  firmList: Actions.getFilmList(store),
+  fetching: Actions.isFetchingFilmList(store),
+  totalResults: Actions.getTotalResults(store),
+  errors: Actions.getErrors(store),
 });
 
 const mapDispatchToProps = {
   fetchFilmList: Actions.fetchFilmList,
+  fetchNextFilmList: Actions.fetchNextFilmList,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(Home);

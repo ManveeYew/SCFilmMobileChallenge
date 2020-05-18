@@ -2,7 +2,7 @@ import Actions from 'actions';
 import uniqBy from 'lodash/uniqBy';
 
 const getDefaultState = () =>
-  ({ isFetching: false, errors: [], data: [], isFilmListFinish: false, isFetchingNextFilmList: false });
+  ({ isFetching: false, errors: [], data: [], totalResults: 0, isReload: false });
 
 function list(state, action) {
   if (typeof state === 'undefined') {
@@ -12,58 +12,29 @@ function list(state, action) {
   switch (action.type) {
     case Actions.FETCH_FILM_LIST:
       return {
+        data: [],
+        errors: [],
         isFetching: true,
-        isFilmListFinish: false,
-        errors: [],
-        data: [],
-        isFetchingNextFilmList: false,
-      };
-    case Actions.FETCH_FILM_LIST_SUCCESS:
-      return {
-        isFetching: false,
-        isFilmListFinish: false,
-        errors: [],
-        data: action.data,
-        isFetchingNextFilmList: false,
-      };
-    case Actions.FETCH_FILM_LIST_FAIL:
-      return {
-        isFetching: false,
-        isFilmListFinish: false,
-        errors: action.errors,
-        data: [],
-        isFetchingNextFilmList: false,
       };
     case Actions.FETCH_NEXT_FILM_LIST:
       return {
-        isFetching: false,
-        isFilmListFinish: true,
+        ...state,
         errors: [],
-        data: state.data,
-        isFetchingNextFilmList: true,
+        isFetching: true,
       };
-    case Actions.FETCH_NEXT_FILM_LIST_SUCCESS:
-      return {
-        isFetching: false,
-        isFilmListFinish: false,
-        errors: [],
-        data: uniqBy(state.data.concat(action.data), 'id'),
-        isFetchingNextFilmList: false,
-      };
-    case Actions.FETCH_NEXT_FILM_LIST_FAIL:
-      return {
-        isFetching: false,
-        isFilmListFinish: false,
-        errors: action.errors,
-        data: state.data,
-        isFetchingNextFilmList: false,
-      };
-    case Actions.FINISH_FETCH_FILM_LIST:
+    case Actions.FETCH_FILM_LIST_SUCCESS:
       return {
         ...state,
         isFetching: false,
-        isFilmListFinish: true,
-        isFetchingNextFilmList: false,
+        errors: [],
+        data: uniqBy(state.data.concat(action.data), 'imdbID'),
+        totalResults: action.totalResults,
+      };
+    case Actions.FETCH_FILM_LIST_FAIL:
+      return {
+        ...state,
+        isFetching: false,
+        errors: action.errors,
       };
     default:
       return state;

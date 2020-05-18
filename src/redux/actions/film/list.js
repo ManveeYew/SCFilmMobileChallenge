@@ -1,50 +1,40 @@
 const NAME = 'FILM';
 
 export const FETCH_FILM_LIST = `${NAME}/FETCH_FILM_LIST`;
+export const FETCH_NEXT_FILM_LIST = `${NAME}/FETCH_NEXT_FILM_LIST`;
 export const FETCH_FILM_LIST_SUCCESS = `${NAME}/FETCH_FILM_LIST_SUCCESS`;
 export const FETCH_FILM_LIST_FAIL = `${NAME}/FETCH_FILM_LIST_FAIL`;
-export const FETCH_NEXT_FILM_LIST = `${NAME}/FETCH_NEXT_FILM_LIST`;
-export const FETCH_NEXT_FILM_LIST_SUCCESS = `${NAME}/FETCH_NEXT_FILM_LIST_SUCCESS`;
-export const FETCH_NEXT_FILM_LIST_FAIL = `${NAME}/FETCH_NEXT_FILM_LIST_FAIL`;
-export const FINISH_FETCH_FILM_LIST = `${NAME}/FINISH_FETCH_FILM_LIST`;
 
 export const getFilmList = store => store[NAME].list.data;
 export const isFetchingFilmList = store => store[NAME].list.isFetching;
-export const isFetchingNextFilmList = store => store[NAME].list.isFetchingNextFilmList;
-export const isFilmListFinish = store => store[NAME].list.isFilmListFinish;
+export const getTotalResults = store => store[NAME].list.totalResults;
+export const getErrors = store => store[NAME].list.errors;
 
-export const fetchFilmList = (search, movieType, callbackSuccess) => ({
+export const fetchFilmList = (search, movieType, page, isReload, callbackSuccess) => ({
   type: FETCH_FILM_LIST,
   search,
   movieType,
+  page,
+  isReload,
   callbackSuccess,
 });
 
-export const fetchFilmListSuccess = data => ({
+export const fetchNextFilmList = (search, movieType, page, isReload, callbackSuccess) => ({
+  type: FETCH_NEXT_FILM_LIST,
+  search,
+  movieType,
+  page,
+  isReload,
+  callbackSuccess,
+});
+
+export const fetchFilmListSuccess = (data, totalResults) => ({
   type: FETCH_FILM_LIST_SUCCESS,
   data,
+  totalResults,
 });
 
 export const fetchFilmListFail = errors => ({
   type: FETCH_FILM_LIST_FAIL,
   errors,
-});
-
-export const fetchNextFilmList = callbackSuccess => ({
-  type: FETCH_NEXT_FILM_LIST,
-  callbackSuccess,
-});
-
-export const fetchNextFilmListSuccess = data => ({
-  type: FETCH_NEXT_FILM_LIST_SUCCESS,
-  data,
-});
-
-export const fetchNextFilmListFail = errors => ({
-  type: FETCH_NEXT_FILM_LIST_FAIL,
-  errors,
-});
-
-export const finishFetchFilmList = () => ({
-  type: FINISH_FETCH_FILM_LIST,
 });

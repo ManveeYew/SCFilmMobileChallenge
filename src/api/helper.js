@@ -2,7 +2,7 @@ import _ from 'lodash';
 import axios from 'axios';
 
 export const fullUrlFrom = (endpoint) => {
-  const baseUrl = 'http://www.ombdapi.com/';
+  const baseUrl = 'http://www.omdbapi.com/';
   const fullUrl = baseUrl + endpoint;
   return fullUrl;
 };
@@ -21,6 +21,13 @@ export const configureInterceptor = () => {
 };
 
 const fetchUrl = (method, endpoint, params = {}) => {
+  axios.get('http://www.omdbapi.com/')
+  .then(response => {
+      this.films = response.data.Search;
+  })
+  .catch(error => {
+      this.errors.push(error);
+  })
   if (_.toUpper(method) === 'GET') {
     return axios({
       method,

@@ -10,6 +10,7 @@ import {
 import PropTypes from 'prop-types';
 import * as Colors from 'themes/colors';
 import * as Animatable from 'react-native-animatable';
+import defaultImage from 'images/film/default.jpg';
 
 class FilmCard extends Component {
 
@@ -24,7 +25,7 @@ class FilmCard extends Component {
         style={styles.container}
       >
         <TouchableOpacity onPress={() => this.props.onCardClick(filmData)}>
-          <ImageBackground source={{uri: filmData.Poster}} imageStyle={{ borderRadius: 8 }} style={styles.filmImage}>
+          <ImageBackground source={{uri: filmData.Poster}} defaultSource={defaultImage} imageStyle={{ borderRadius: 8 }} style={styles.filmImage}>
             <View style={styles.cardContainer}>
               <View style={styles.textContainer}>
                 <Text numberOfLines={1} ellipsizeMode="tail" style={styles.titleText}>{filmData.Title}</Text>
