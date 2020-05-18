@@ -1,6 +1,6 @@
 import Actions from 'actions';
 
-const getDefaultState = () => ({ isFetching: false, errors: [], data: [] });
+const getDefaultState = () => ({ isFetching: false, errors: [], data: {} });
 
 function get(state, action) {
   if (typeof state === 'undefined') {
@@ -12,7 +12,7 @@ function get(state, action) {
       return {
         isFetching: true,
         errors: [],
-        data: [],
+        data: {},
       };
     case Actions.FETCH_FILM_SUCCESS:
       return {
@@ -24,7 +24,7 @@ function get(state, action) {
       return {
         isFetching: false,
         errors: action.errors,
-        data: [],
+        data: {},
       };
     case Actions.CLEAR_FILM:
       return getDefaultState();
