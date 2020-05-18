@@ -1,0 +1,6 @@
+module Pods_SCMobileChallenge_SCMobileChallengeTests {
+  umbrella header "Pods-SCMobileChallenge-SCMobileChallengeTests-umbrella.h"
+
+  export *
+  module * { export * }
+}
