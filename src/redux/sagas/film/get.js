@@ -7,8 +7,8 @@ function* fetchFilm({ id, callbackSuccess }) {
 
     const response = yield call(api.getFilm, id);
     const json = response && response.data;
-    if (json && json.data && json.data.attributes) {
-      yield put(Actions.fetchFilmSuccess([{ attributes: json.data.attributes }]));
+    if (json && json.Title) {
+      yield put(Actions.fetchFilmSuccess(json));
       if (callbackSuccess) {
         yield call(callbackSuccess);
       }

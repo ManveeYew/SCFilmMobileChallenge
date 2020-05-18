@@ -15,6 +15,7 @@ function list(state, action) {
         data: [],
         errors: [],
         isFetching: true,
+        totalResults: 0,
       };
     case Actions.FETCH_NEXT_FILM_LIST:
       return {
